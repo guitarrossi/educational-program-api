@@ -1,0 +1,40 @@
+version: '3.4'
+
+networks:
+  dev:
+    driver: bridge 
+
+services:
+  educational-program-plan-api:
+    image: ${REGISTRY:-educational-program-plan-api}/plan.api:${PLATFORM:-linux}-${TAG:-latest}
+    depends_on:
+      - "plan_postgresql_db"
+    container_name: educational-program-plan-api
+    ports:
+      - "5009:80"
+    build:
+      context: .
+      dockerfile: Plan.WebApi/Dockerfile
+    environment:
+      - ConnectionString=host=localhost;port=5432;database=plan-db;username=postgres;password=postgres;Pooling=true;
+    networks:
+      - dev
+
+  plan_postgresql_db:
+    image: postgres:latest
+    container_name: plan_postgresql_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=plan-db
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - plan_data:/var/lib/postgresql/data/ 
+    networks:
+      - dev
+
+volumes:
+  plan_data:
+  
